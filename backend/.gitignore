@@ -1,0 +1,5 @@
+node_modules/
+.env
+config/ecom-webon-e39680fded1b.json
+*.log
+
