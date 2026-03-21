@@ -69,13 +69,19 @@ app.use(morgan('dev'));
 
 // ── CORS ─────────────────────────────────────────────────
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(',');
+// app.use(cors({
+//   origin: (origin, cb) => {
+//     // Allow requests with no origin (Postman, mobile apps)
+//     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+//     cb(new Error(`CORS: origin ${origin} not allowed`));
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// }));
 app.use(cors({
-  origin: (origin, cb) => {
-    // Allow requests with no origin (Postman, mobile apps)
-    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error(`CORS: origin ${origin} not allowed`));
-  },
-  credentials: true,
+  origin: '*',
+  credentials: false,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
@@ -125,9 +131,9 @@ const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: allowedOrigins,
+    origin: "*",
     methods: ['GET', 'POST'],
-    credentials: true,
+    credentials: false,
   },
   pingTimeout:  60000,
   pingInterval: 25000,

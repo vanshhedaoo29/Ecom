@@ -1,0 +1,110 @@
+[
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-xhdpi_ic_launcher_round.png.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-xhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/layout_activity_register.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_register.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/layout_activity_incoming_call.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_incoming_call.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/menu_bottom_nav_menu.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/menu/bottom_nav_menu.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-anydpi-v26/ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/layout_activity_add_product.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_add_product.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/layout_fragment_orders.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/layout/fragment_orders.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/layout_item_product.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/layout/item_product.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/drawable_ic_notification.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/drawable/ic_notification.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/drawable_ic_launcher_foreground.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/drawable/ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/drawable_ic_launcher_background.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/layout_fragment_products.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/layout/fragment_products.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/layout_activity_video_call.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_video_call.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/layout_activity_home.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_home.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-hdpi_ic_launcher_round.png.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-hdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/layout_activity_go_live.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_go_live.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/layout_item_order.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/layout/item_order.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/layout_activity_login.xml.flat",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-xxxhdpi_ic_launcher_round.png.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-xxxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-xxhdpi_ic_launcher_round.png.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-xxhdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-mdpi_ic_launcher_round.png.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-mdpi/ic_launcher_round.png"
+    },
+    {
+        "merged": "com.ecom.seller.app-merged_res-55:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "com.ecom.seller.app-main-57:/mipmap-mdpi/ic_launcher.png"
+    }
+]

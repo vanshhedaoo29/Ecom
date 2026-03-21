@@ -1,7 +1,71 @@
+
+
+
+
 // routes/live.js
 const express = require('express');
 const router  = express.Router();
 const { authMiddleware, requireRole } = require('../middleware/auth');
+
+//new
+
+
+// POST /api/live/start
+router.post('/start', authMiddleware, requireRole('seller'), async (req, res) => {
+  const { shopId } = req.body;
+  const db = global.db;
+  try {
+    const channelName = `live_${shopId}_${Date.now()}`;
+    const [r] = await db.query(
+      `INSERT INTO live_sessions (shop_id, seller_id, agora_channel, status, started_at)
+       VALUES (?, ?, ?, 'live', NOW())`,
+      [shopId, req.user.id, channelName]
+    );
+    await db.query('UPDATE shops SET is_live = 1 WHERE id = ?', [shopId]);
+    res.json({
+      success: true,
+      sessionId: r.insertId,
+      channelName: channelName,
+      token: ''
+    });
+  } catch (err) {
+    console.error('[Live/start]', err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// POST /api/live/end
+router.post('/end', authMiddleware, requireRole('seller'), async (req, res) => {
+  const { sessionId } = req.body;
+  const db = global.db;
+  try {
+    const [[session]] = await db.query(
+      'SELECT * FROM live_sessions WHERE id = ?', [sessionId]
+    );
+    if (!session) return res.status(404).json({ success: false, message: 'Not found' });
+    await db.query(
+      `UPDATE live_sessions SET status='ended', ended_at=NOW() WHERE id=?`, [sessionId]
+    );
+    await db.query('UPDATE shops SET is_live = 0 WHERE id = ?', [session.shop_id]);
+    res.json({ success: true, message: 'Live ended' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // GET /api/live — all currently live sessions
 router.get('/', async (req, res) => {

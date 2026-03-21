@@ -1,0 +1,46 @@
+[
+    {
+        "merged": "com.ecom.seller.app-mergeDebugResources-54:/layout/activity_incoming_call.xml",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_incoming_call.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-mergeDebugResources-54:/layout/activity_login.xml",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_login.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-mergeDebugResources-54:/layout/fragment_orders.xml",
+        "source": "com.ecom.seller.app-main-57:/layout/fragment_orders.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-mergeDebugResources-54:/layout/activity_register.xml",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_register.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-mergeDebugResources-54:/layout/activity_add_product.xml",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_add_product.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-mergeDebugResources-54:/layout/activity_home.xml",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_home.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-mergeDebugResources-54:/layout/item_product.xml",
+        "source": "com.ecom.seller.app-main-57:/layout/item_product.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-mergeDebugResources-54:/layout/fragment_products.xml",
+        "source": "com.ecom.seller.app-main-57:/layout/fragment_products.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-mergeDebugResources-54:/layout/item_order.xml",
+        "source": "com.ecom.seller.app-main-57:/layout/item_order.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-mergeDebugResources-54:/layout/activity_go_live.xml",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_go_live.xml"
+    },
+    {
+        "merged": "com.ecom.seller.app-mergeDebugResources-54:/layout/activity_video_call.xml",
+        "source": "com.ecom.seller.app-main-57:/layout/activity_video_call.xml"
+    }
+]

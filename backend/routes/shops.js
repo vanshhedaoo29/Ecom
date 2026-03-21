@@ -21,6 +21,53 @@ router.get('/', async (req, res) => {
   }
 });
 
+//new code
+
+// GET /api/shops/my — get seller's own shop
+router.get('/my', authMiddleware, requireRole('seller'), async (req, res) => {
+  const db = global.db;
+  try {
+    const [[shop]] = await db.query(
+      `SELECT * FROM shops WHERE seller_id = ?`, [req.user.id]
+    );
+    if (!shop) return res.status(404).json({ success: false, message: 'Shop not found' });
+    res.json({ success: true, shop });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // GET /api/shops/:id — single shop detail
 router.get('/:id', async (req, res) => {
   const db = global.db;
