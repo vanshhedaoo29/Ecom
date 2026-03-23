@@ -14,10 +14,11 @@ class ProductAdapter(private val products: List<Product>) :
         fun bind(product: Product) {
             binding.tvProductName.text = product.name
             binding.tvProductPrice.text = "₹${product.price}"
-            binding.tvProductStock.text = "Stock: ${product.stock}"
+            binding.tvProductStock.text = "Stock: ${product.stock_qty}"
             binding.tvProductCategory.text = product.category
         }
     }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductViewHolder {
         val binding = ItemProductBinding.inflate(LayoutInflater.from(parent.context), parent, false)

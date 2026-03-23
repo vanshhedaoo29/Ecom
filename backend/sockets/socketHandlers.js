@@ -103,7 +103,16 @@ module.exports = function registerSocketHandlers(io) {
       socket.to(`call_${callSessionId}`).emit('ar_stopped', { callSessionId });
     });
 
-    // ── 10. Disconnect cleanup ──────────────────────────────
+    // ── 10. Seller captures garment → forward to buyer ──────
+    // Seller emits: garment_captured { imageUrl, callId }
+    // Buyer receives: garment_ready { imageUrl }
+    socket.on('garment_captured', ({ imageUrl, callId }) => {
+      if (!imageUrl || !callId) return;
+      socket.to(`call_${callId}`).emit('garment_ready', { imageUrl });
+      console.log(`[Socket] garment_captured → forwarded to call_${callId}`);
+    });
+
+    // ── 11. Disconnect cleanup ──────────────────────────────
     socket.on('disconnect', () => {
       for (const [userId, sid] of userSocketMap.entries()) {
         if (sid === socket.id) {

@@ -1,12 +1,5 @@
 // ============================================================
 // routes/upload.js — Image Upload Endpoints
-//
-// POST /api/upload/product-images   → upload up to 5 product images
-// POST /api/upload/shop-logo        → upload shop logo
-// POST /api/upload/shop-banner      → upload shop banner
-// POST /api/upload/avatar           → upload user avatar
-// POST /api/upload/ar-capture       → upload base64 AR garment frame
-// DELETE /api/upload/:publicId      → delete an image from Cloudinary
 // ============================================================
 
 const express = require('express');
@@ -18,11 +11,26 @@ const {
   handleUploadError,
   uploadBase64,
   deleteImage,
+  cloudinary,
 } = require('../middleware/upload');
+const multer             = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+// ── AR capture specific Cloudinary storage ───────────────────
+const arStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder:          'ar-captures',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+    transformation:  [{ quality: 'auto', fetch_format: 'auto' }],
+  },
+});
+const arUploader = multer({
+  storage: arStorage,
+  limits:  { fileSize: 5 * 1024 * 1024 },
+});
 
 // ── POST /api/upload/product-images ─────────────────────────
-// Seller uploads up to 5 product images at once
-// Returns array of Cloudinary URLs
 router.post(
   '/product-images',
   authMiddleware,
@@ -33,7 +41,7 @@ router.post(
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ success: false, message: 'No files uploaded' });
     }
-    const urls = req.files.map(f => f.path); // Cloudinary secure_url
+    const urls = req.files.map(f => f.path);
     res.json({ success: true, urls });
   }
 );
@@ -73,7 +81,6 @@ router.post(
   async (req, res) => {
     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
     const url = req.file.path;
-    // Save avatar URL to user record
     const db = global.db;
     await db.query('UPDATE users SET avatar_url = ? WHERE id = ?', [url, req.user.id]);
     res.json({ success: true, url });
@@ -81,28 +88,44 @@ router.post(
 );
 
 // ── POST /api/upload/ar-capture ──────────────────────────────
-// AR engine sends a base64 garment frame captured from seller video
-// Body: { image: "data:image/png;base64,..." }
-router.post('/ar-capture', authMiddleware, async (req, res) => {
-  const { image } = req.body;
-  if (!image || !image.startsWith('data:image')) {
-    return res.status(422).json({ success: false, message: 'Valid base64 image required' });
+// Accepts BOTH:
+//   1. multipart/form-data — field name: "image" (file upload)
+//   2. JSON body           — { image: "data:image/png;base64,..." }
+// Returns: { success, imageUrl }
+router.post(
+  '/ar-capture',
+  authMiddleware,
+  (req, res, next) => {
+    const ct = req.headers['content-type'] || '';
+    if (ct.includes('multipart/form-data')) {
+      return arUploader.single('image')(req, res, next);
+    }
+    next();
+  },
+  async (req, res) => {
+    try {
+      // Case 1 — file uploaded via multipart
+      if (req.file) {
+        return res.json({ success: true, imageUrl: req.file.path });
+      }
+      // Case 2 — base64 string in JSON body
+      const { image } = req.body;
+      if (!image || !image.startsWith('data:image')) {
+        return res.status(422).json({ success: false, message: 'Valid image file or base64 required' });
+      }
+      const { url } = await uploadBase64(image, 'ar-captures');
+      return res.json({ success: true, imageUrl: url });
+    } catch (err) {
+      console.error('[Upload/ar-capture]', err);
+      res.status(500).json({ success: false, message: 'Upload failed' });
+    }
   }
-  try {
-    const { url, publicId } = await uploadBase64(image, 'ar-captures');
-    res.json({ success: true, url, publicId });
-  } catch (err) {
-    console.error('[Upload/ar-capture]', err);
-    res.status(500).json({ success: false, message: 'Upload failed' });
-  }
-});
+);
 
 // ── DELETE /api/upload/:publicId ─────────────────────────────
-// publicId comes URL-encoded e.g. "ecom%2Fproducts%2Fabc123"
 router.delete('/:publicId(*)', authMiddleware, async (req, res) => {
-  const publicId = req.params.publicId;
   try {
-    await deleteImage(publicId);
+    await deleteImage(req.params.publicId);
     res.json({ success: true, message: 'Image deleted' });
   } catch (err) {
     console.error('[Upload/delete]', err);

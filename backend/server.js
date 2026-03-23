@@ -24,6 +24,7 @@ const cartRoutes    = require('./routes/cart');
 const orderRoutes   = require('./routes/orders');
 const paymentRoutes = require('./routes/payments');
 const uploadRoutes  = require('./routes/upload');
+const arRoutes      = require('./routes/ar');
 
 // ── Socket handler ────────────────────────────────────────
 const registerSocketHandlers = require('./sockets/socketHandlers');
@@ -68,17 +69,6 @@ app.use(helmet());
 app.use(morgan('dev'));
 
 // ── CORS ─────────────────────────────────────────────────
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:3000').split(',');
-// app.use(cors({
-//   origin: (origin, cb) => {
-//     // Allow requests with no origin (Postman, mobile apps)
-//     if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-//     cb(new Error(`CORS: origin ${origin} not allowed`));
-//   },
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-// }));
 app.use(cors({
   origin: '*',
   credentials: false,
@@ -103,6 +93,7 @@ app.use('/api/cart',     cartRoutes);
 app.use('/api/orders',   orderRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/upload',   uploadRoutes);
+app.use('/api/ar',       arRoutes);
 
 // ── Health check ──────────────────────────────────────────
 app.get('/api/health', (req, res) => {
@@ -131,7 +122,7 @@ const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
+    origin: '*',
     methods: ['GET', 'POST'],
     credentials: false,
   },

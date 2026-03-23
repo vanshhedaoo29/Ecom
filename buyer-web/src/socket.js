@@ -1,7 +1,7 @@
 // src/socket.js
 import { io } from 'socket.io-client';
 
-const socket = io('http://10.227.108.7:5000', { // ← Replace with Member 1's IP
+const socket = io('http://10.227.108.8:5000', { // ← Replace with Member 1's IP
   autoConnect: true,
   reconnection: true,
   reconnectionAttempts: 5,

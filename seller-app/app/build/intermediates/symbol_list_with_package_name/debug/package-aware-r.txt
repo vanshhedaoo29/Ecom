@@ -3277,6 +3277,7 @@ id bounceEnd
 id bounceStart
 id btnAccept
 id btnAddProduct
+id btnCaptureAR
 id btnDispatched
 id btnEndCall
 id btnGoLive
@@ -3286,6 +3287,7 @@ id btnPickImage
 id btnRegister
 id btnReject
 id btnStopLive
+id btnSwitchCamera
 id buttonPanel
 id cache_measures
 id callControls

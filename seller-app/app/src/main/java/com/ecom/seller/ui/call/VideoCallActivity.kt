@@ -13,6 +13,7 @@ import com.ecom.seller.data.api.RetrofitClient
 import com.ecom.seller.databinding.ActivityVideoCallBinding
 import com.ecom.seller.utils.Constants
 import com.ecom.seller.utils.SessionManager
+import com.ecom.seller.utils.ARCaptureManager
 import com.ecom.seller.utils.SocketManager
 import io.agora.rtc2.ChannelMediaOptions
 import io.agora.rtc2.Constants as AgoraConstants
@@ -65,6 +66,22 @@ class VideoCallActivity : AppCompatActivity() {
         binding.tvBuyerName.text = buyerName
         binding.tvCallStatus.text = "Connecting..."
         binding.btnEndCall.setOnClickListener { endCall() }
+
+        binding.btnCaptureAR.setOnClickListener {
+            binding.btnCaptureAR.isEnabled = false
+            binding.btnCaptureAR.text = "Sending..."
+            val token = sessionManager.getToken() ?: return@setOnClickListener
+            ARCaptureManager.captureWithAgora(
+                rtcEngine, this, token, callId, channelName
+            ) { success ->
+                if (success) {
+                    binding.btnCaptureAR.visibility = android.view.View.GONE
+                } else {
+                    binding.btnCaptureAR.isEnabled = true
+                    binding.btnCaptureAR.text = "Capture for AR"
+                }
+            }
+        }
 
         if (!hasPermissions()) {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, PERMISSION_REQ)

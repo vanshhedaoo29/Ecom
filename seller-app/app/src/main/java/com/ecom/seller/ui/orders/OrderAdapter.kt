@@ -15,10 +15,10 @@ class OrderAdapter(
     inner class OrderViewHolder(private val binding: ItemOrderBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(order: Order) {
-            binding.tvBuyerName.text = "Buyer: ${order.buyerName}"
-            binding.tvProductName.text = order.productName
+            binding.tvBuyerName.text = "Buyer: ${order.buyer_id}"
+            binding.tvProductName.text = "Product ID: ${order.product_id}"
             binding.tvQuantity.text = "Qty: ${order.quantity}"
-            binding.tvPrice.text = "₹${order.totalPrice}"
+            binding.tvPrice.text = "₹${order.total_price}"
             binding.tvStatus.text = "Status: ${order.status}"
 
             binding.btnPacked.visibility = if (order.status == "pending") View.VISIBLE else View.GONE

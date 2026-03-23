@@ -37,6 +37,18 @@
         android:padding="8dp"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnSwitchCamera"
+        android:layout_margin="16dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSwitchCamera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📷 Back"
+        android:backgroundTint="#88000000"
+        android:textColor="@android:color/white"
+        android:textSize="12sp"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_margin="16dp"/>
 

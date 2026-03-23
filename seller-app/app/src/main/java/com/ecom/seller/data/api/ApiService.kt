@@ -110,6 +110,12 @@ interface ApiService {
         @Body request: Map<String, @JvmSuppressWildcards Any>
     ): Response<ApiResponse<LiveSession>>
 
+    @POST("agora/call-channel")
+    suspend fun getCallChannel(
+        @Header("Authorization") token: String,
+        @Body request: Map<String, @JvmSuppressWildcards Any>
+    ): Response<AgoraTokenResponse>
+
     // Calls
     @PATCH("calls/{id}/accept")
     suspend fun acceptCall(
@@ -128,6 +134,14 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("id") id: String
     ): Response<ApiResponse<Any>>
+
+    // AR Capture
+    @Multipart
+    @POST("upload/ar-capture")
+    suspend fun uploadARCapture(
+        @Header("Authorization") token: String,
+        @Part image: MultipartBody.Part
+    ): Response<ARCaptureResponse>
 
     // Orders
     @GET("orders/seller")

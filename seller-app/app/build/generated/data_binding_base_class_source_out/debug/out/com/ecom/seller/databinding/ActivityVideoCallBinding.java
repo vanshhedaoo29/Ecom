@@ -9,7 +9,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.ecom.seller.R;
@@ -20,7 +19,10 @@ import java.lang.String;
 
 public final class ActivityVideoCallBinding implements ViewBinding {
   @NonNull
-  private final ConstraintLayout rootView;
+  private final LinearLayout rootView;
+
+  @NonNull
+  public final MaterialButton btnCaptureAR;
 
   @NonNull
   public final MaterialButton btnEndCall;
@@ -43,11 +45,13 @@ public final class ActivityVideoCallBinding implements ViewBinding {
   @NonNull
   public final TextView tvCallStatus;
 
-  private ActivityVideoCallBinding(@NonNull ConstraintLayout rootView,
-      @NonNull MaterialButton btnEndCall, @NonNull LinearLayout callControls, @NonNull View divider,
+  private ActivityVideoCallBinding(@NonNull LinearLayout rootView,
+      @NonNull MaterialButton btnCaptureAR, @NonNull MaterialButton btnEndCall,
+      @NonNull LinearLayout callControls, @NonNull View divider,
       @NonNull FrameLayout localVideoContainer, @NonNull FrameLayout remoteVideoContainer,
       @NonNull TextView tvBuyerName, @NonNull TextView tvCallStatus) {
     this.rootView = rootView;
+    this.btnCaptureAR = btnCaptureAR;
     this.btnEndCall = btnEndCall;
     this.callControls = callControls;
     this.divider = divider;
@@ -59,7 +63,7 @@ public final class ActivityVideoCallBinding implements ViewBinding {
 
   @Override
   @NonNull
-  public ConstraintLayout getRoot() {
+  public LinearLayout getRoot() {
     return rootView;
   }
 
@@ -84,6 +88,12 @@ public final class ActivityVideoCallBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.btnCaptureAR;
+      MaterialButton btnCaptureAR = ViewBindings.findChildViewById(rootView, id);
+      if (btnCaptureAR == null) {
+        break missingId;
+      }
+
       id = R.id.btnEndCall;
       MaterialButton btnEndCall = ViewBindings.findChildViewById(rootView, id);
       if (btnEndCall == null) {
@@ -126,8 +136,9 @@ public final class ActivityVideoCallBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ActivityVideoCallBinding((ConstraintLayout) rootView, btnEndCall, callControls,
-          divider, localVideoContainer, remoteVideoContainer, tvBuyerName, tvCallStatus);
+      return new ActivityVideoCallBinding((LinearLayout) rootView, btnCaptureAR, btnEndCall,
+          callControls, divider, localVideoContainer, remoteVideoContainer, tvBuyerName,
+          tvCallStatus);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

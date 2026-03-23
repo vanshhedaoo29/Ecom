@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://10.227.108.7:5000/api', // ← Replace with Member 1's IP
+  baseURL: 'http://10.227.108.8:5000/api', // ← Replace with Member 1's IP
   timeout: 10000,
 });
 

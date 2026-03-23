@@ -12,7 +12,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.ecom.seller.data.api.RetrofitClient
 import com.ecom.seller.data.models.EndLiveRequest
-import com.ecom.seller.data.models.StartLiveRequest
 import com.ecom.seller.databinding.ActivityGoLiveBinding
 import com.ecom.seller.utils.Constants
 import com.ecom.seller.utils.SessionManager
@@ -33,16 +32,21 @@ class GoLiveActivity : AppCompatActivity() {
     private var sessionId: String = ""
     private var channelName: String = ""
     private var isLive = false
+    private var isDestroying = false
+    private var isFrontCamera = false  // default: back camera
 
     companion object {
         private const val PERMISSION_REQ = 100
-        private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO
+        )
     }
 
     private val rtcEventHandler = object : IRtcEngineEventHandler() {
         override fun onUserJoined(uid: Int, elapsed: Int) {
             runOnUiThread {
-                binding.tvViewerCount.text = "Viewers: updating..."
+                binding.tvViewerCount.text = "👁 viewers connected"
             }
         }
         override fun onUserOffline(uid: Int, reason: Int) {}
@@ -50,6 +54,11 @@ class GoLiveActivity : AppCompatActivity() {
             runOnUiThread {
                 binding.tvStatus.text = "🔴 LIVE"
                 isLive = true
+            }
+        }
+        override fun onError(err: Int) {
+            runOnUiThread {
+                Toast.makeText(this@GoLiveActivity, "Agora error: $err", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -68,6 +77,7 @@ class GoLiveActivity : AppCompatActivity() {
 
         binding.btnGoLive.setOnClickListener { startLive() }
         binding.btnStopLive.setOnClickListener { stopLive() }
+        binding.btnSwitchCamera.setOnClickListener { switchCamera() }
 
         setupSocketListeners()
     }
@@ -80,15 +90,28 @@ class GoLiveActivity : AppCompatActivity() {
         try {
             rtcEngine = RtcEngine.create(this, Constants.AGORA_APP_ID, rtcEventHandler)
             rtcEngine?.enableVideo()
-            rtcEngine?.startPreview()
+
+            // Default to BACK camera — Agora defaults to front so switch once
+            rtcEngine?.switchCamera()
 
             val surfaceView = SurfaceView(this)
+            binding.localVideoContainer.removeAllViews()
             binding.localVideoContainer.addView(surfaceView)
-            rtcEngine?.setupLocalVideo(VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_HIDDEN, 0))
+            rtcEngine?.setupLocalVideo(
+                VideoCanvas(surfaceView, VideoCanvas.RENDER_MODE_HIDDEN, 0)
+            )
+            rtcEngine?.startPreview()
         } catch (e: Exception) {
             Toast.makeText(this, "Agora init failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
+
+    private fun switchCamera() {
+        isFrontCamera = !isFrontCamera
+        rtcEngine?.switchCamera()
+        binding.btnSwitchCamera.text = if (isFrontCamera) "🤳 Front" else "📷 Back"
+    }
+
     private fun startLive() {
         val shopId = sessionManager.getShopId()
         if (shopId.isNullOrEmpty()) {
@@ -103,11 +126,7 @@ class GoLiveActivity : AppCompatActivity() {
             try {
                 val token = sessionManager.getToken() ?: return@launch
 
-                // Use agora/live-channel — generates token + creates session
-                val body = mapOf(
-                    "shopId" to shopId,
-                    "uid" to 0
-                )
+                val body = mapOf("shopId" to shopId, "uid" to 0)
                 val response = RetrofitClient.apiService.startLiveWithToken(
                     "Bearer $token", body
                 )
@@ -118,23 +137,25 @@ class GoLiveActivity : AppCompatActivity() {
                     sessionId = data?.liveSessionId?.toString() ?: ""
                     val agoraToken = data?.token ?: ""
 
-                    // Get liveSessionId from raw response
+                    if (channelName.isEmpty()) {
+                        Toast.makeText(this@GoLiveActivity, "Failed: empty channel name", Toast.LENGTH_SHORT).show()
+                        binding.btnGoLive.isEnabled = true
+                        return@launch
+                    }
+
                     joinAgoraChannel(channelName, agoraToken)
                     SocketManager.emitGoLive(shopId, channelName)
 
                     binding.btnGoLive.visibility = View.GONE
                     binding.btnStopLive.visibility = View.VISIBLE
                     binding.tvViewerCount.visibility = View.VISIBLE
-                    binding.tvStatus.text = "🔴 LIVE"
+
                 } else {
-                    Toast.makeText(this@GoLiveActivity,
-                        "Failed to start live: ${response.code()}",
-                        Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@GoLiveActivity, "Failed to start live: ${response.code()}", Toast.LENGTH_SHORT).show()
                     binding.btnGoLive.isEnabled = true
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@GoLiveActivity,
-                    "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@GoLiveActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 binding.btnGoLive.isEnabled = true
             } finally {
                 binding.progressBar.visibility = View.GONE
@@ -142,30 +163,53 @@ class GoLiveActivity : AppCompatActivity() {
         }
     }
 
-
     private fun joinAgoraChannel(channel: String, agoraToken: String) {
         val options = ChannelMediaOptions().apply {
             channelProfile = AgoraConstants.CHANNEL_PROFILE_LIVE_BROADCASTING
             clientRoleType = AgoraConstants.CLIENT_ROLE_BROADCASTER
+            publishCameraTrack = true
+            publishMicrophoneTrack = true
         }
         rtcEngine?.joinChannel(agoraToken.ifEmpty { null }, channel, 0, options)
     }
 
     private fun stopLive() {
         isLive = false
+        binding.btnStopLive.isEnabled = false
+
         lifecycleScope.launch {
             try {
                 val token = sessionManager.getToken() ?: return@launch
-                RetrofitClient.apiService.endLive("Bearer $token", EndLiveRequest(sessionId))
+                if (sessionId.isNotEmpty()) {
+                    RetrofitClient.apiService.endLive("Bearer $token", EndLiveRequest(sessionId))
+                }
                 SocketManager.emitEndLive(channelName)
             } catch (e: Exception) {
                 // ignore
             } finally {
-                rtcEngine?.leaveChannel()
-                RtcEngine.destroy()
-                rtcEngine = null
+                cleanupAgora()
                 finish()
             }
+        }
+    }
+
+    private fun cleanupAgora() {
+        try {
+            rtcEngine?.stopPreview()
+            rtcEngine?.leaveChannel()
+            val engine = rtcEngine
+            rtcEngine = null
+            Thread { RtcEngine.destroy() }.start()
+        } catch (e: Exception) {
+            // ignore
+        }
+    }
+
+    override fun onBackPressed() {
+        if (isLive) {
+            Toast.makeText(this, "Tap Stop Live to end your stream", Toast.LENGTH_SHORT).show()
+        } else {
+            super.onBackPressed()
         }
     }
 
@@ -192,23 +236,8 @@ class GoLiveActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         SocketManager.off("viewer_count")
-        // Only stop preview, don't leave channel or end session
-        // stopLive() handles the proper cleanup when seller taps Stop
-        rtcEngine?.stopPreview()
         if (!isLive) {
-            // Only destroy if never went live
-            RtcEngine.destroy()
-            rtcEngine = null
-        }
-    }
-
-
-
-    override fun onBackPressed() {
-        if (isLive) {
-            Toast.makeText(this, "Tap Stop Live to end the stream", Toast.LENGTH_SHORT).show()
-        } else {
-            super.onBackPressed()
+            cleanupAgora()
         }
     }
 }

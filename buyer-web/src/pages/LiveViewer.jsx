@@ -20,8 +20,8 @@ const css = `
   .lv-body { flex:1; position:relative; background:#000; display:flex; align-items:center; justify-content:center; overflow:hidden; }
   #remote-video-container { width:100%; height:100%; }
   #remote-video-container video { width:100%!important; height:100%!important; object-fit:cover!important; }
-  .lv-video-gradient { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,0.6) 0%,transparent 40%); pointer-events:none; }
-  .lv-seller-info { position:absolute; bottom:120px; left:20px; background:rgba(0,0,0,0.55); backdrop-filter:blur(8px); padding:10px 16px; }
+  .lv-video-gradient { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 40%); pointer-events:none; }
+  .lv-seller-info { position:absolute; bottom:160px; left:20px; background:rgba(0,0,0,0.55); backdrop-filter:blur(8px); padding:10px 16px; }
   .lv-seller-name { font-size:13px; color:rgba(255,255,255,0.8); font-weight:300; }
 
   /* NO STREAM / ENDED */
@@ -31,6 +31,57 @@ const css = `
   .lv-ended-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.85); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; z-index:10; }
   .lv-ended-overlay h2 { font-family:var(--font-display); font-size:28px; font-weight:300; color:rgba(255,255,255,0.5); }
   .lv-back-btn { padding:10px 24px; background:var(--white); border:none; color:var(--black); font-family:var(--font-body); font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; }
+
+  /* ACTION BUTTONS — floating bottom right */
+  .lv-action-btns {
+    position:absolute;
+    bottom:160px;
+    right:20px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    z-index:10;
+  }
+
+  .lv-call-btn {
+    display:flex; align-items:center; gap:8px;
+    padding:12px 20px;
+    background:var(--white);
+    border:none;
+    color:var(--black);
+    font-family:var(--font-body);
+    font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:500;
+    cursor:pointer;
+    transition:opacity var(--transition);
+    white-space:nowrap;
+  }
+  .lv-call-btn:hover { opacity:0.88; }
+  .lv-call-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+  .lv-ar-btn {
+    display:flex; align-items:center; gap:8px;
+    padding:12px 20px;
+    background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.25);
+    backdrop-filter:blur(8px);
+    color:var(--white);
+    font-family:var(--font-body);
+    font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:500;
+    cursor:pointer;
+    transition:all var(--transition);
+    white-space:nowrap;
+  }
+  .lv-ar-btn:hover { background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.5); }
+
+  /* Calling state */
+  .lv-calling-toast {
+    position:absolute; top:70px; left:50%; transform:translateX(-50%) translateY(-20px);
+    background:rgba(255,255,255,0.1); backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,0.2);
+    padding:12px 24px; font-size:12px; letter-spacing:1px; text-transform:uppercase;
+    color:var(--white); opacity:0; transition:all 0.3s; z-index:30; white-space:nowrap;
+  }
+  .lv-calling-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
   /* PRODUCTS STRIP — overlaid at bottom of video */
   .lv-products-strip {
@@ -46,10 +97,8 @@ const css = `
   .lv-products-scroll::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.15); }
   .lv-product-chip {
     display:flex; align-items:center; gap:8px;
-    background:rgba(255,255,255,0.1);
-    border:1px solid rgba(255,255,255,0.15);
-    backdrop-filter:blur(8px);
-    padding:8px 12px; cursor:pointer; flex-shrink:0;
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15);
+    backdrop-filter:blur(8px); padding:8px 12px; cursor:pointer; flex-shrink:0;
     transition:border-color var(--transition), background var(--transition);
   }
   .lv-product-chip:hover { border-color:rgba(255,255,255,0.35); background:rgba(255,255,255,0.18); }
@@ -57,6 +106,11 @@ const css = `
   .lv-prod-img img { width:100%; height:100%; object-fit:cover; }
   .lv-prod-name { font-size:11px; color:rgba(255,255,255,0.75); white-space:nowrap; max-width:90px; overflow:hidden; text-overflow:ellipsis; }
   .lv-prod-price { font-size:11px; color:rgba(255,255,255,0.45); margin-top:2px; }
+
+  @media(max-width:768px){
+    .lv-action-btns { bottom:140px; right:12px; }
+    .lv-call-btn, .lv-ar-btn { padding:10px 14px; font-size:10px; }
+  }
 `;
 
 const client = AgoraRTC.createClient({ mode:'live', codec:'vp8' });
@@ -71,6 +125,10 @@ export default function LiveViewer() {
   const [streamActive, setStreamActive] = useState(false);
   const [streamEnded, setStreamEnded] = useState(false);
   const [joined, setJoined] = useState(false);
+  const [calling, setCalling] = useState(false);
+  const [callingToast, setCallingToast] = useState(false);
+
+  const user = JSON.parse(localStorage.getItem('user')||'{}');
 
   // Fetch session if not in state
   useEffect(() => {
@@ -84,9 +142,7 @@ export default function LiveViewer() {
   // Fetch products
   useEffect(() => {
     const shopId = shop?.id||session?.shop_id;
-    if (shopId) {
-      api.get(`/products?shopId=${shopId}`).then(r=>setProducts(r.data.products||[]));
-    }
+    if (shopId) api.get(`/products?shopId=${shopId}`).then(r=>setProducts(r.data.products||[]));
   },[shop,session]);
 
   // Join Agora as audience
@@ -117,13 +173,65 @@ export default function LiveViewer() {
     };
   },[joinAgora]);
 
-  // Socket: live ended
+  // Socket: live ended + call accepted
   useEffect(() => {
     if (!session?.id&&!sessionId) return;
     const liveId = session?.id||sessionId;
-    socket.on('live_ended',({liveSessionId})=>{ if (liveSessionId===liveId) setStreamEnded(true); });
-    return ()=>{ socket.off('live_ended'); };
-  },[session,sessionId]);
+
+    socket.on('live_ended',({liveSessionId})=>{
+      if (liveSessionId===liveId) setStreamEnded(true);
+    });
+
+    // If seller accepts call, navigate to CallScreen
+    socket.on('call_accepted',({ callSessionId, agoraChannel })=>{
+      setCalling(false);
+      navigate(`/call/${callSessionId}`,{ state:{ callSessionId, shop, agoraChannel } });
+    });
+
+    socket.on('call_rejected',()=>{
+      setCalling(false);
+      setCallingToast(false);
+      alert('Seller is busy right now. Try again later.');
+    });
+
+    return ()=>{
+      socket.off('live_ended');
+      socket.off('call_accepted');
+      socket.off('call_rejected');
+    };
+  },[session,sessionId,shop]);
+
+  // Call seller handler
+  const handleCall = async () => {
+    if (calling) return;
+    setCalling(true);
+    setCallingToast(true);
+    try {
+      const r = await api.post('/calls',{
+        seller_id: session?.seller_id||shop?.seller_id,
+        shop_id: shop?.id||session?.shop_id,
+      });
+      socket.emit('call_request',{
+        callSessionId: r.data.callSessionId,
+        buyerId: user.id,
+        buyerName: user.name,
+        sellerId: session?.seller_id||shop?.seller_id,
+        shopId: shop?.id||session?.shop_id,
+      });
+      // Auto hide toast after 30s if no response
+      setTimeout(()=>{ setCalling(false); setCallingToast(false); }, 30000);
+    } catch {
+      setCalling(false);
+      setCallingToast(false);
+      alert('Could not initiate call. Please try again.');
+    }
+  };
+
+  // AR button — starts call first, AR available inside call
+  const handleAR = () => {
+    if (calling) return;
+    handleCall();
+  };
 
   return (
     <>
@@ -168,6 +276,23 @@ export default function LiveViewer() {
             </div>
           )}
 
+          {/* Calling toast */}
+          <div className={`lv-calling-toast ${callingToast?'show':''}`}>
+            📞 Calling seller…
+          </div>
+
+          {/* Action buttons — bottom right */}
+          {!streamEnded && (
+            <div className="lv-action-btns">
+              <button className="lv-call-btn" onClick={handleCall} disabled={calling}>
+                {calling ? '📞 Calling…' : '📹 Call Seller'}
+              </button>
+              <button className="lv-ar-btn" onClick={handleAR} disabled={calling}>
+                ✨ Try AR
+              </button>
+            </div>
+          )}
+
           {/* Products strip overlaid at bottom */}
           {products.length>0&&(
             <div className="lv-products-strip">
@@ -180,7 +305,7 @@ export default function LiveViewer() {
                     onClick={()=>navigate(`/product/${p.id}`,{state:{product:p}})}
                   >
                     <div className="lv-prod-img">
-                      {p.image_urls?.[0] ? <img src={p.image_urls[0]} alt={p.name}/> : '👗'}
+                      {p.image_urls?.[0]?<img src={p.image_urls[0]} alt={p.name}/>:'👗'}
                     </div>
                     <div>
                       <div className="lv-prod-name">{p.name}</div>

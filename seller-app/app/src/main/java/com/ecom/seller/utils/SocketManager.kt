@@ -102,4 +102,12 @@ object SocketManager {
         }
         socket?.emit("send_message", data)
     }
+
+    fun emitGarmentCaptured(imageUrl: String, callId: String) {
+        val data = JSONObject().apply {
+            put("imageUrl", imageUrl)
+            put("callId", callId)
+        }
+        socket?.emit("garment_captured", data)
+    }
 }

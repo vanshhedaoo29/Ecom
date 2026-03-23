@@ -29,6 +29,9 @@ public final class ActivityGoLiveBinding implements ViewBinding {
   public final MaterialButton btnStopLive;
 
   @NonNull
+  public final MaterialButton btnSwitchCamera;
+
+  @NonNull
   public final FrameLayout localVideoContainer;
 
   @NonNull
@@ -42,11 +45,13 @@ public final class ActivityGoLiveBinding implements ViewBinding {
 
   private ActivityGoLiveBinding(@NonNull ConstraintLayout rootView,
       @NonNull MaterialButton btnGoLive, @NonNull MaterialButton btnStopLive,
-      @NonNull FrameLayout localVideoContainer, @NonNull ProgressBar progressBar,
-      @NonNull TextView tvStatus, @NonNull TextView tvViewerCount) {
+      @NonNull MaterialButton btnSwitchCamera, @NonNull FrameLayout localVideoContainer,
+      @NonNull ProgressBar progressBar, @NonNull TextView tvStatus,
+      @NonNull TextView tvViewerCount) {
     this.rootView = rootView;
     this.btnGoLive = btnGoLive;
     this.btnStopLive = btnStopLive;
+    this.btnSwitchCamera = btnSwitchCamera;
     this.localVideoContainer = localVideoContainer;
     this.progressBar = progressBar;
     this.tvStatus = tvStatus;
@@ -92,6 +97,12 @@ public final class ActivityGoLiveBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btnSwitchCamera;
+      MaterialButton btnSwitchCamera = ViewBindings.findChildViewById(rootView, id);
+      if (btnSwitchCamera == null) {
+        break missingId;
+      }
+
       id = R.id.localVideoContainer;
       FrameLayout localVideoContainer = ViewBindings.findChildViewById(rootView, id);
       if (localVideoContainer == null) {
@@ -117,7 +128,7 @@ public final class ActivityGoLiveBinding implements ViewBinding {
       }
 
       return new ActivityGoLiveBinding((ConstraintLayout) rootView, btnGoLive, btnStopLive,
-          localVideoContainer, progressBar, tvStatus, tvViewerCount);
+          btnSwitchCamera, localVideoContainer, progressBar, tvStatus, tvViewerCount);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

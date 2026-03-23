@@ -1,7 +1,7 @@
 package com.ecom.seller.utils
 
 object Constants {
-    const val BASE_URL = "http://10.227.108.7:5000/api/"
+    const val BASE_URL = "http://10.227.108.8:5000/api/"
     const val SOCKET_URL = "http://10.227.108.7:5000"
     const val AGORA_APP_ID = "aac165124d7f408bac4058927ee809a4"
 
